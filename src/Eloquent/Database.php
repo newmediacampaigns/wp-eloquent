@@ -27,6 +27,22 @@ class Database implements ConnectionInterface
      */
     protected $config = [];
 
+    public function scalar($query, $bindings = [], $useReadPdo = true)
+    {
+        $result = $this->selectOne($query, $bindings, $useReadPdo);
+
+        if (is_object($result)) {
+            $result = array_shift((array) $result);
+        }
+
+        return $result;
+    }
+
+    public function getDatabaseName()
+    {
+        return $this->db->dbname;
+    }
+
     /**
      * Initializes the Database class
      *
@@ -73,7 +89,7 @@ class Database implements ConnectionInterface
      *
      * @return \Illuminate\Database\Query\Builder
      */
-    public function table($table)
+    public function table($table, $as = null)
     {
         $processor = $this->getPostProcessor();
 
@@ -435,7 +451,7 @@ class Database implements ConnectionInterface
 
     public function getQueryGrammar()
     {
-        return new Grammar();
+        return new Grammar(new \Illuminate\Database\Connection($this->db, $this->getDatabaseName(), '', []));
     }
 
     /**
